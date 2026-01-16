@@ -3,6 +3,7 @@
 
 # Log file
 *.log
+*.log.gz
 
 # BlueJ files
 *.ctxt
@@ -26,3 +27,7 @@ replay_pid*
 # Gradle
 build/
 .gradle/
+
+# Minecraft
+run/world/
+run/*.json
