@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "ldap",
+  "version": "${version}",
+  "name": "CraftLDAP",
+  "description": "LDAP-based auth-mod for Minecraft",
+  "authors": ["Guzio"],
+  "contact": {
+    "homepage": "guziohub.ovh",
+    "sources": "github.com/GuzioMG/CraftLDAP"
+  },
+  "license": "MIT",
+  "icon": "assets/ldap/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "hub.guzio.CraftLdap.Main"
+    ]
+  },
+  "mixins": [
+    "ldap.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
