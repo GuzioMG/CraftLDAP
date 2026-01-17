@@ -17,10 +17,12 @@ import java.util.Properties;
 
 public class Main implements ModInitializer {
 
-    public static final LoggingEventBuilder out = LoggerFactory.getLogger("CraftLDAP").atInfo();
-    public static final LoggingEventBuilder err = LoggerFactory.getLogger("CraftLDAP").atError();
-    public static final LoggingEventBuilder wrn = LoggerFactory.getLogger("CraftLDAP").atWarn();
-    public static final LoggingEventBuilder dbg = LoggerFactory.getLogger("CraftLDAP").atDebug();
+    private static final String logAs = "CraftLDAP";
+
+    public static final LoggingEventBuilder out = LoggerFactory.getLogger(logAs).atInfo();
+    public static final LoggingEventBuilder err = LoggerFactory.getLogger(logAs).atError();
+    public static final LoggingEventBuilder wrn = LoggerFactory.getLogger(logAs).atWarn();
+    public static final LoggingEventBuilder dbg = LoggerFactory.getLogger(logAs).atDebug();
 
     public static final String KEY_HOST = "host";
     public static final String KEY_PORT = "port";
@@ -98,26 +100,7 @@ public class Main implements ModInitializer {
         out.log("Registering the event handler...");
         ServerPlayConnectionEvents.INIT.register(new JoinEventHandler(connection, config));
         out.log("Event handler registered!");
+
         out.log("CraftLDAP started!");
-
-        /*
-
-        My earlier testing session (I was trying to assess where is the best event to hook into). Kept in, because I think I'll turn it into a micro-mod at some point (I hate it how Minecraft will sometimes provide absolutely no information that there was any login attempt, only that - from apparently nowhere, and without joining prior - a player is reported to be disconnected).
-
-        ServerPlayConnectionEvents.INIT.register((ServerPlayNetworkHandler serverPlayNetworkHandler, MinecraftServer minecraftServer) -> {
-            System.out.println("Play init: " + serverPlayNetworkHandler.player.getName());
-        });
-
-        ServerPlayConnectionEvents.JOIN.register((ServerPlayNetworkHandler serverPlayNetworkHandler, PacketSender packetSender, MinecraftServer minecraftServer) -> {
-                System.out.println("Play join: " + serverPlayNetworkHandler.player.getName());
-        });
-
-        ServerLoginConnectionEvents.INIT.register((ServerLoginNetworkHandler serverLoginNetworkHandler, MinecraftServer minecraftServer) -> {
-            System.out.println("Login init: " + serverLoginNetworkHandler.getConnectionInfo());
-        });
-
-        ServerLoginConnectionEvents.QUERY_START.register((ServerLoginNetworkHandler serverLoginNetworkHandler, MinecraftServer minecraftServer, LoginPacketSender loginPacketSender, ServerLoginNetworking.LoginSynchronizer loginSynchronizer) -> {
-                System.out.println("Login query: " + serverLoginNetworkHandler.getConnectionInfo());
-        });*/
     }
 }

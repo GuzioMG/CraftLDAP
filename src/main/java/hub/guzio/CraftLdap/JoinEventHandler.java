@@ -42,7 +42,7 @@ public class JoinEventHandler implements ServerPlayConnectionEvents.Init {
         }
 
         try {
-            var results = filterEntries(event.getPlayer().getUuid(), connection.search(config.getProperty(Main.KEY_GROUP), SearchScope.SUB, Main.KEY_GROUP).getSearchEntries(), config.getProperty(Main.KEY_MCUUID), config.getProperty(Main.KEY_LDAPNAME));
+            var results = filterEntries(event.getPlayer().getUuid(), connection.search(config.getProperty(Main.KEY_GROUP), SearchScope.SUB, config.getProperty(Main.KEY_FILTER)).getSearchEntries());
             if (results.length < 1){
                 Main.out.log(event.player.getName().getString() + " attempted to join, but was not authenticated with LDAP.");
                 event.disconnect(new DisconnectionInfo(Text.literal(config.getProperty(Main.KEY_ERRAUTH))));
@@ -57,14 +57,14 @@ public class JoinEventHandler implements ServerPlayConnectionEvents.Init {
         }
     }
 
-    public static String[] filterEntries(UUID player, List<SearchResultEntry> results, String uuidKey, String nameKey) throws LDAPException{
+    public String[] filterEntries(UUID player, List<SearchResultEntry> results) throws LDAPException{
         var outputRaw = new String[results.size()];
         int index = 0;
 
         try{
             for (var result : results) {
-                if (result.getAttribute(uuidKey).getValue().equals(player.toString())){
-                    outputRaw[index] = result.getAttribute(nameKey).getValue();
+                if (result.getAttribute(config.getProperty(Main.KEY_MCUUID)).getValue().equals(player.toString())){
+                    outputRaw[index] = result.getAttribute(config.getProperty(Main.KEY_LDAPNAME)).getValue();
                     index++;
                 }
             }
