@@ -28,7 +28,6 @@ public class Main implements ModInitializer {
     public static final String KEY_PORT = "port";
     public static final String KEY_USER = "bind-dn";
     public static final String KEY_PASS = "bind-pass";
-    public static final String KEY_SAFE = "safe-mode";
     public static final String KEY_GROUP = "base-dn";
     public static final String KEY_FILTER = "filter";
     public static final String KEY_WEBSITE = "bugreport-url";
@@ -53,10 +52,9 @@ public class Main implements ModInitializer {
             if (e instanceof FileNotFoundException){
                 wrn.log("A new config file needs to be created because the previous one failed to load. Error details:", e);
                 config.setProperty(KEY_HOST, "ldap");
-                config.setProperty(KEY_PORT, ""+config_port);
+                config.setProperty(KEY_PORT, ""+config_port); //Cheesy „parsing” trick
                 config.setProperty(KEY_USER, "cn=[some user that can read the index],ou=people,dc=example,dc=com");
                 config.setProperty(KEY_PASS, "[the password of that user]");
-                config.setProperty(KEY_SAFE, "true");
                 config.setProperty(KEY_GROUP, "ou=people,dc=example,dc=com");
                 config.setProperty(KEY_FILTER, "(&(objectclass=person)(memberOf=cn=[some group],ou=groups,dc=example,dc=com))");
                 config.setProperty(KEY_WEBSITE, "https://example.com/");
@@ -81,7 +79,6 @@ public class Main implements ModInitializer {
         } catch (NumberFormatException e) {
             wrn.log("Couldn't read port value \""+config.getProperty(KEY_PORT)+"\" due to the following error: ", e, "\nUsing the default value of "+config_port+" instead.");
         }
-        boolean config_safe = Boolean.parseBoolean(config.getProperty(KEY_SAFE));
         out.log("Config obtained!");
 
         out.log("Connecting to LDAP...");
@@ -90,12 +87,8 @@ public class Main implements ModInitializer {
             connection = con;
             out.log("LDAP connection established!");
         } catch (LDAPException e) {
-            err.log("Couldn't connect to LDAP. Error details:", e);
+            wrn.log("Couldn't connect to LDAP. Error details:", e, "\nDue to this, the very first player login will consider a connection re-attempt due to it now being in a „dropped-out” state.");
             e.printStackTrace();
-            if (!config_safe){
-                wrn.log("Safe-mode is OFF! That means that CraftLDAP will „fail-open”, ie. let anyone join (by skipping event handler registration) if an error occurs. Said error just occurred, and so your server is currently running without protection! This should only be used for testing or under special circumstances.");
-                return;
-            }
         }
 
         out.log("Registering the event handler...");
