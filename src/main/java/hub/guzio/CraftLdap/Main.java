@@ -44,13 +44,13 @@ public class Main implements ModInitializer {
         Path props = FabricLoader.getInstance().getConfigDir().resolve("ldap.properties");
         int config_port = 3890;
         dbg.log("Path is:", props);
-        var errmsg_generic = "\nCannot operate; crashing the server instead.";
+        var errmsg_generic = "\nCannot operate in this broken-config state; crashing the server instead.";
         var config = new Properties();
         try {
             config.load(new FileInputStream(props.toFile()));
         } catch (IOException e) {
             if (e instanceof FileNotFoundException){
-                wrn.log("A new config file needs to be created because the previous one failed to load. Error details:", e);
+                wrn.log("A new config file needs to be created because the previous one seems to not exist. Error details:", e);
                 config.setProperty(KEY_HOST, "ldap");
                 config.setProperty(KEY_PORT, ""+config_port); //Cheesy „parsing” trick
                 config.setProperty(KEY_USER, "cn=[some user that can read the index],ou=people,dc=example,dc=com");
@@ -66,18 +66,18 @@ public class Main implements ModInitializer {
                 try {
                     config.store(new FileWriter(props.toFile()), "Config file for CraftLDAP. Refer to Modrinth page or GitHub README for documentation.");
                 } catch (IOException ex) {
-                    err.log("Couldn't open the config file due to it not yet existing. Error details:", e, "\nSubsequently, attempted to create a new one. That, too however, failed. Error details:", ex, errmsg_generic);
+                    err.log("Couldn't open the config file due to it not yet existing. Error details:\n{}\nSubsequently, attempted to create a new one. That, too however, failed. Error details:\n{}"+errmsg_generic, e, ex);
                     throw new RuntimeException(ex);
                 }
             } else {
-                err.log("Couldn't open the config file, for a reason other than „it simply not being there”. Error details:", e, errmsg_generic);
+                err.log("Couldn't open the config file, for a reason other than „it simply not being there”. Error details:\n{}"+errmsg_generic, e);
                 throw new RuntimeException(e);
             }
         }
         try{
             config_port = Integer.parseInt(config.getProperty("port"));
         } catch (NumberFormatException e) {
-            wrn.log("Couldn't read port value \""+config.getProperty(KEY_PORT)+"\" due to the following error: ", e, "\nUsing the default value of "+config_port+" instead.");
+            wrn.log("Couldn't read port value \"{}\" due to the following error:\n{}\nUsing the default value of {} instead.", config.getProperty(KEY_PORT), e, config_port);
         }
         out.log("Config obtained!");
 
@@ -87,8 +87,7 @@ public class Main implements ModInitializer {
             connection = con;
             out.log("LDAP connection established!");
         } catch (LDAPException e) {
-            wrn.log("Couldn't connect to LDAP. Error details:", e, "\nDue to this, the very first player login will consider a connection re-attempt due to it now being in a „dropped-out” state.");
-            e.printStackTrace();
+            wrn.log("Couldn't connect to LDAP. Error details:\n{}\nDue to this, the very first player login will cause a connection re-attempt due to it now being in a „dropped-out” state.", e);
         }
 
         out.log("Registering the event handler...");

@@ -28,13 +28,13 @@ public class JoinEventHandler implements ServerPlayConnectionEvents.Init {
 
     @Override
     public void onPlayInit(@NotNull ServerPlayNetworkHandler event, @NonNull MinecraftServer server) {
-        Main.out.log("Attempting to auth now-joining user \"" + event.player.getName().getString() + "\" using LDAP...");
+        Main.out.log("Attempting to auth now-joining player, named \"{}\", by searching their UUID of {} on your LDAP server...", event.player.getName().getString(), event.player.getUuid().toString());
 
         DisconnectionInfo errmsg_ldap = new DisconnectionInfo(Text.literal(config.getProperty(Main.KEY_ERRUNKNOWN)));
         try {
             errmsg_ldap = new DisconnectionInfo(errmsg_ldap.reason(), Optional.empty(), Optional.of(new URI(config.getProperty(Main.KEY_WEBSITE))));
         } catch (URISyntaxException e) {
-            Main.wrn.log("Couldn't parse bugreport URI, will not provide it at all in case this auth session fails. Error details:", e);
+            Main.wrn.log("Couldn't parse bugreport URI, will not provide it at all in case this auth session fails. Error details:\n{}", e);
         }
 
         try {
@@ -46,7 +46,7 @@ public class JoinEventHandler implements ServerPlayConnectionEvents.Init {
             }
             var results = filterEntries(event.getPlayer().getUuid(), connection.search(config.getProperty(Main.KEY_GROUP), SearchScope.SUB, config.getProperty(Main.KEY_FILTER)).getSearchEntries());
             if (results.length < 1){
-                Main.out.log(event.player.getName().getString() + " attempted to join, but was not authenticated with LDAP.");
+                Main.out.log("Player named \"{}\" attempted to join, but their UUID of {} was not found on your LDAP server. Rejecting their login...", event.player.getName().getString(), event.player.getUuid().toString());
                 event.disconnect(new DisconnectionInfo(Text.literal(config.getProperty(Main.KEY_ERRAUTH))));
             }
             else {
@@ -54,8 +54,7 @@ public class JoinEventHandler implements ServerPlayConnectionEvents.Init {
             }
         }
         catch (LDAPException | NumberFormatException e) {
-            Main.err.log(event.player.getName().getString() + " attempted to join, but CraftLDAP couldn't determine whether they're authorized to do so (so their join attempt was rejected), due to the following error:", e);
-            e.printStackTrace();
+            Main.err.log("Player named \"{}\" attempted to join, but CraftLDAP couldn't determine whether their UUID of {} is actually listed on LDAP (so their join attempt was rejected), due to the following error:\n", event.player.getName().getString(), event.player.getUuid().toString(), e);
             event.disconnect(errmsg_ldap);
         }
     }
