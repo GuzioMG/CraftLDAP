@@ -37,12 +37,6 @@ public class JoinEventHandler implements ServerPlayConnectionEvents.Init {
             Main.wrn.log("Couldn't parse bugreport URI, will not provide it at all in case this auth session fails. Error details:", e);
         }
 
-        if (connection == null){
-            Main.wrn.log(event.player.getName().getString() + " attempted to join, but CraftLDAP couldn't connect to LDAP on startup and it's set to „fail-closed”. Their join attempt will get automatically rejected.");
-            event.disconnect(errmsg_ldap);
-            return;
-        }
-
         try {
             if(!connection.isConnected()){
                 Main.wrn.log("LDAP connection dropped out - trying again...");
