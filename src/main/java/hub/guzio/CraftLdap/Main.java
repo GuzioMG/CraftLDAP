@@ -91,6 +91,7 @@ public class Main implements ModInitializer {
             out.log("LDAP connection established!");
         } catch (LDAPException e) {
             err.log("Couldn't connect to LDAP. Error details:", e);
+            e.printStackTrace();
             if (!config_safe){
                 wrn.log("Safe-mode is OFF! That means that CraftLDAP will „fail-open”, ie. let anyone join (by skipping event handler registration) if an error occurs. Said error just occurred, and so your server is currently running without protection! This should only be used for testing or under special circumstances.");
                 return;
