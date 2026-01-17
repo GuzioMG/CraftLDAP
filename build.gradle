@@ -28,6 +28,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api}"
 
     implementation "com.unboundid:unboundid-ldapsdk:${project.ldap}"
+    include "com.unboundid:unboundid-ldapsdk:${project.ldap}"
 }
 
 processResources {
