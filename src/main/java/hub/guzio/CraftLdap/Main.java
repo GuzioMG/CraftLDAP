@@ -5,9 +5,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.*;
 import net.fabricmc.loader.api.FabricLoader;
-import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
-import org.slf4j.spi.LoggingEventBuilder;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

@@ -7,7 +7,9 @@
   "authors": ["Guzio"],
   "contact": {
     "homepage": "guziohub.ovh",
-    "sources": "github.com/GuzioMG/CraftLDAP"
+    "sources": "github.com/GuzioMG/CraftLDAP",
+    "email": "guzekk@protonmail.com",
+    "issues": "github.com/GuzioMG/CraftLDAP"
   },
   "license": "MIT",
   "icon": "assets/ldap/icon.png",
@@ -17,12 +19,10 @@
       "hub.guzio.CraftLdap.Main"
     ]
   },
-  "mixins": [
-    "ldap.mixins.json"
-  ],
+  "mixins": [],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
-    "minecraft": "${minecraft_version}"
+    "minecraft": ">=${minecraft_version}"
   }
 }
