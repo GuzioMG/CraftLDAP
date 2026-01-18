@@ -6,6 +6,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.*;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.slf4j.spi.LoggingEventBuilder;
 
 import java.io.FileInputStream;
@@ -19,10 +20,10 @@ public class Main implements ModInitializer {
 
     private static final String logAs = "CraftLDAP";
 
-    public static final LoggingEventBuilder out = LoggerFactory.getLogger(logAs).atInfo();
-    public static final LoggingEventBuilder err = LoggerFactory.getLogger(logAs).atError();
-    public static final LoggingEventBuilder wrn = LoggerFactory.getLogger(logAs).atWarn();
-    public static final LoggingEventBuilder dbg = LoggerFactory.getLogger(logAs).atDebug();
+    public static final Logger out = new Logger(Level.INFO, logAs);
+    public static final Logger err = new Logger(Level.ERROR, logAs);
+    public static final Logger wrn = new Logger(Level.WARN, logAs);
+    public static final Logger dbg = new Logger(Level.DEBUG, logAs);
 
     public static final String KEY_HOST = "host";
     public static final String KEY_PORT = "port";
@@ -50,7 +51,7 @@ public class Main implements ModInitializer {
             config.load(new FileInputStream(props.toFile()));
         } catch (IOException e) {
             if (e instanceof FileNotFoundException){
-                wrn.log("A new config file needs to be created because the previous one seems to not exist. Error details:", e);
+                wrn.log("A new config file needs to be created because the previous one seems to not exist. Error details:\n{}", e);
                 config.setProperty(KEY_HOST, "ldap");
                 config.setProperty(KEY_PORT, ""+config_port); //Cheesy „parsing” trick
                 config.setProperty(KEY_USER, "cn=[some user that can read the index],ou=people,dc=example,dc=com");
@@ -64,7 +65,7 @@ public class Main implements ModInitializer {
                 config.setProperty(KEY_ERRAUTH, "You're not authorized to play on this server.");
 
                 try {
-                    config.store(new FileWriter(props.toFile()), "Config file for CraftLDAP. Refer to Modrinth page or GitHub README for documentation.");
+                    config.store(new FileWriter(props.toFile()), "Config file for CraftLDAP. Refer to the Modrinth-page or GitHub README for documentation.");
                 } catch (IOException ex) {
                     err.log("Couldn't open the config file due to it not yet existing. Error details:\n{}\nSubsequently, attempted to create a new one. That, too however, failed. Error details:\n{}"+errmsg_generic, e, ex);
                     throw new RuntimeException(ex);

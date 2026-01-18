@@ -18,8 +18,8 @@ import java.util.UUID;
 
 public class JoinEventHandler implements ServerPlayConnectionEvents.Init {
 
-    private final LDAPConnection connection;
-    private final Properties config;
+    public final LDAPConnection connection;
+    public final Properties config;
 
     JoinEventHandler(LDAPConnection connection, Properties config){
         this.connection = connection;
