@@ -2,10 +2,10 @@ package hub.guzio.CraftLdap;
 
 import com.unboundid.ldap.sdk.*;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.network.DisconnectionInfo;
+import net.minecraft.network.DisconnectionDetails;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.text.Text;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
@@ -27,12 +27,12 @@ public class JoinEventHandler implements ServerPlayConnectionEvents.Init {
     }
 
     @Override
-    public void onPlayInit(@NotNull ServerPlayNetworkHandler event, @NonNull MinecraftServer server) {
-        Main.out.log("Attempting to auth now-joining player, named \"{}\", by searching their UUID of {} on your LDAP server...", event.player.getName().getString(), event.player.getUuid().toString());
+    public void onPlayInit(@NotNull ServerGamePacketListenerImpl event, @NonNull MinecraftServer server) {
+        Main.out.log("Attempting to auth now-joining player, named \"{}\", by searching their UUID of {} on your LDAP server...", event.player.getName().getString(), event.player.getUUID().toString());
 
-        DisconnectionInfo errmsg_ldap = new DisconnectionInfo(Text.literal(config.getProperty(Main.KEY_ERRUNKNOWN)));
+        DisconnectionDetails errmsg_ldap = new DisconnectionDetails(Component.literal(config.getProperty(Main.KEY_ERRUNKNOWN)));
         try {
-            errmsg_ldap = new DisconnectionInfo(errmsg_ldap.reason(), Optional.empty(), Optional.of(new URI(config.getProperty(Main.KEY_WEBSITE))));
+            errmsg_ldap = new DisconnectionDetails(errmsg_ldap.reason(), Optional.empty(), Optional.of(new URI(config.getProperty(Main.KEY_WEBSITE))));
         } catch (URISyntaxException e) {
             Main.wrn.log("Couldn't parse bugreport URI, will not provide it at all in case this auth session fails. Error details:\n{}", e);
         }
@@ -44,17 +44,17 @@ public class JoinEventHandler implements ServerPlayConnectionEvents.Init {
                 connection.bind(config.getProperty(Main.KEY_USER), config.getProperty(Main.KEY_PASS));
                 Main.out.log("Reconnected!");
             }
-            var results = filterEntries(event.getPlayer().getUuid(), connection.search(config.getProperty(Main.KEY_GROUP), SearchScope.SUB, config.getProperty(Main.KEY_FILTER)).getSearchEntries());
+            var results = filterEntries(event.getPlayer().getUUID(), connection.search(config.getProperty(Main.KEY_GROUP), SearchScope.SUB, config.getProperty(Main.KEY_FILTER)).getSearchEntries());
             if (results.length < 1){
-                Main.out.log("Player named \"{}\" attempted to join, but their UUID of {} was not found on your LDAP server. Rejecting their login...", event.player.getName().getString(), event.player.getUuid().toString());
-                event.disconnect(new DisconnectionInfo(Text.literal(config.getProperty(Main.KEY_ERRAUTH))));
+                Main.out.log("Player named \"{}\" attempted to join, but their UUID of {} was not found on your LDAP server. Rejecting their login...", event.player.getName().getString(), event.player.getUUID().toString());
+                event.disconnect(new DisconnectionDetails(Component.literal(config.getProperty(Main.KEY_ERRAUTH))));
             }
             else {
                 Main.out.log(event.player.getName().getString() + " joined as the following LDAP user(s): [ \""+String.join("\", \"", results)+"\" ].");
             }
         }
         catch (LDAPException | NumberFormatException e) {
-            Main.err.log("Player named \"{}\" attempted to join, but CraftLDAP couldn't determine whether their UUID of {} is actually listed on LDAP (so their join attempt was rejected), due to the following error:\n", event.player.getName().getString(), event.player.getUuid().toString(), e);
+            Main.err.log("Player named \"{}\" attempted to join, but CraftLDAP couldn't determine whether their UUID of {} is actually listed on LDAP (so their join attempt was rejected), due to the following error:\n", event.player.getName().getString(), event.player.getUUID().toString(), e);
             event.disconnect(errmsg_ldap);
         }
     }
